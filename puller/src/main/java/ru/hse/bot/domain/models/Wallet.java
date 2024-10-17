@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @Entity
 @Data
@@ -21,8 +21,8 @@ public class Wallet {
     private String number;
 
     @Column(name = "last_activity", nullable = false)
-    private OffsetDateTime lastActivity = OffsetDateTime.now();
+    private Instant lastActivity = Instant.now();
 
     @Column(name = "checked_at", nullable = false)
-    private OffsetDateTime checkedAt = OffsetDateTime.now();
+    private Instant checkedAt = Instant.now();
 }
