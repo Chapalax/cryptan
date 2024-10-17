@@ -8,7 +8,7 @@ import ru.hse.bot.domain.jpa.JpaWalletRepository;
 import ru.hse.bot.domain.models.Wallet;
 import ru.hse.bot.exceptions.WalletNotFoundException;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class WalletRepository implements DaoWalletRepository {
     @Override
     @Transactional
     public List<Wallet> findAllToUpdate() {
-        return walletRepository.findAllByCheckedAtBefore(Instant.now().minusSeconds(checkInterval * 60));
+        return walletRepository.findAllByCheckedAtBefore(OffsetDateTime.now().minusMinutes(checkInterval));
     }
 
     @Override

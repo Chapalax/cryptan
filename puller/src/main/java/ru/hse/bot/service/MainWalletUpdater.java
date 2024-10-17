@@ -11,10 +11,11 @@ import ru.hse.bot.domain.models.Wallet;
 import ru.hse.bot.dto.WalletUpdateResponse;
 import ru.hse.bot.service.interfaces.MessageSender;
 import ru.hse.bot.service.interfaces.WalletUpdater;
+import ru.hse.bot.utility.TimeConverter;
 import ru.hse.bot.web.dto.SolanaDataResponse;
 import ru.hse.bot.web.interfaces.WebClientSolana;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +33,10 @@ public class MainWalletUpdater implements WalletUpdater {
         List<Wallet> walletsToUpdate = walletRepository.findAllToUpdate();
         for (Wallet wallet : walletsToUpdate) {
             log.info("Founded wallet to update: {}", wallet.getNumber());
-            wallet.setCheckedAt(Instant.now());
+            wallet.setCheckedAt(OffsetDateTime.now());
             SolanaDataResponse response = solanaClient.fetchWalletsTransactions(wallet.getNumber());
-            if (wallet.getLastActivity().isBefore(Instant.ofEpochSecond(response.blockTime()))) {
-                wallet.setLastActivity(Instant.ofEpochSecond(response.blockTime()));
+            if (wallet.getLastActivity().isBefore(convertTime(response.blockTime()))) {
+                wallet.setLastActivity(convertTime(response.blockTime()));
                 log.info("Wallet update successful, sending changes to bot...");
                 sender.send(new WalletUpdateResponse(
                         wallet.getId(),
@@ -55,5 +56,9 @@ public class MainWalletUpdater implements WalletUpdater {
             users.add(track.getChatId());
         }
         return users;
+    }
+
+    private OffsetDateTime convertTime(Long utc) {
+        return TimeConverter.convertFromUtcToOffsetDateTime(utc);
     }
 }

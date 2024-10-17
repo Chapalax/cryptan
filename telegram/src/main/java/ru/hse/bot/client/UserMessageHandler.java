@@ -20,9 +20,8 @@ public class UserMessageHandler implements UserMessageProcessor {
     private final String WARNING = "This command does not exist.\nList of available commands: /help";
     private final String SUCCESSFUL_TRACK = "The wallet has been successfully added!";
     private final String SUCCESSFUL_UNTRACK = "The wallet has been successfully deleted!";
-    private final String REPLY_TRACK = "Enter a wallet number you are interested in:";
-    private final String REPLY_UNTRACK = "Enter the wallet number "
-            + "from which transactions you want to unsubscribe:";
+    private final String REPLY_TRACK = "In response to this message, enter the wallet number you are interested in:";
+    private final String REPLY_UNTRACK = "In response to this message, enter the number of the wallet whose transactions you want to unsubscribe from:";
 
     private final PullerWebClient pullerClient;
 

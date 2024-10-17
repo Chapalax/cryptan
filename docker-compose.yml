@@ -25,7 +25,7 @@ services:
       - --hub-mode=off
       - --changelog-file=master.xml
       - --driver=org.postgresql.Driver
-      - --url=jdbc:postgresql://postgresql:5432/puller
+      - --url=jdbc:postgresql://postgresql:5432/puller?serverTimezone=UTC
       - --username=user
       - --password=secret
       - update

@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import jakarta.annotation.PostConstruct;
@@ -61,8 +62,11 @@ public class TrackerBot implements Bot {
         for (Long tgChatId : updates.tgChatIds()) {
             bot.execute(new SendMessage(
                     tgChatId,
-                    "New transactions in: " + updates.wallet() + "\n" + updates.description()
-            ));
+                    "*New transactions!*\n" +
+                            "\n*Wallet:*\n" + updates.wallet() +
+                            "\n\n*Transaction:*\n" + updates.description())
+                    .parseMode(ParseMode.Markdown)
+            );
         }
     }
 }

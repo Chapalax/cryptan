@@ -13,10 +13,10 @@ import ru.hse.bot.exceptions.AddedWalletExistsException;
 import ru.hse.bot.exceptions.ChatNotFoundException;
 import ru.hse.bot.exceptions.WalletNotFoundException;
 import ru.hse.bot.service.interfaces.WalletService;
+import ru.hse.bot.utility.TimeConverter;
 import ru.hse.bot.web.dto.SolanaDataResponse;
 import ru.hse.bot.web.interfaces.WebClientSolana;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +47,7 @@ public class MainWalletService implements WalletService {
             }
         } else {
             SolanaDataResponse response = solanaClient.fetchWalletsTransactions(wallet.getNumber());
-            wallet.setLastActivity(Instant.ofEpochSecond(response.blockTime()));
+            wallet.setLastActivity(TimeConverter.convertFromUtcToOffsetDateTime(response.blockTime()));
             wallet = walletRepository.add(wallet);
         }
 
