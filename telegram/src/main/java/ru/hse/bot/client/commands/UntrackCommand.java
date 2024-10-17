@@ -11,7 +11,7 @@ import ru.hse.bot.client.interfaces.Command;
 public class UntrackCommand implements Command {
     private final String COMMAND = "untrack";
     private final String DESCRIPTION = "Stop tracking wallet";
-    private final String ANSWER = "Enter the wallet number from which transactions you want to unsubscribe:";
+    private final String ANSWER = "In response to this message, enter the number of the wallet whose transactions you want to unsubscribe from:";
     private final String PLACEHOLDER = "nix9RErnQYXpuf329ntPgSzThogtfeyUempD7zDrnSH";
 
     @Override
