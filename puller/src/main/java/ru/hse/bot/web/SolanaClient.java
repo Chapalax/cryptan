@@ -11,7 +11,6 @@ import ru.hse.bot.web.interfaces.WebClientSolana;
 
 import java.util.Objects;
 
-// TODO
 public class SolanaClient implements WebClientSolana {
     @Value("${baseurl.solana}")
     private String solanaBaseUrl;

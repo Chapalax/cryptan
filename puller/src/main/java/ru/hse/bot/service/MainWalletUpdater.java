@@ -40,7 +40,7 @@ public class MainWalletUpdater implements WalletUpdater {
                 sender.send(new WalletUpdateResponse(
                         wallet.getId(),
                         wallet.getNumber(),
-                        "New transaction!",
+                        response.signature(),
                         getUsers(wallet)
                 ));
             }

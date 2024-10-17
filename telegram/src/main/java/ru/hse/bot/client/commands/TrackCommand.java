@@ -11,7 +11,7 @@ import ru.hse.bot.client.interfaces.Command;
 public class TrackCommand implements Command {
     private final String COMMAND = "track";
     private final String DESCRIPTION = "Start tracking wallet";
-    private final String ANSWER = "Enter a wallet number you are interested in:";
+    private final String ANSWER = "In response to this message, enter the wallet number you are interested in:";
     private final String PLACEHOLDER = "nix9RErnQYXpuf329ntPgSzThogtfeyUempD7zDrnSH";
 
     @Override
