@@ -64,8 +64,12 @@ public class TrackerBot implements Bot {
                     tgChatId,
                     "*New transactions!*\n" +
                             "\n*Wallet:*\n" + updates.wallet() +
-                            "\n\n*Transaction:*\n" + updates.description())
-                    .parseMode(ParseMode.Markdown)
+                            "\n\n*Transaction:*\n" + updates.transaction() +
+                            "\n\n*Swapped* " + updates.sourceTokenAmount() +
+                            " " + updates.sourceTokenKey() + " on " +
+                            updates.destinationTokenAmount() + " " +
+                            updates.destinationTokenKey()
+                    ).parseMode(ParseMode.Markdown)
             );
         }
     }

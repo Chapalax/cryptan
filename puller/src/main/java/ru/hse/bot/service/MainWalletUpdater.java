@@ -12,7 +12,9 @@ import ru.hse.bot.dto.WalletUpdateResponse;
 import ru.hse.bot.service.interfaces.MessageSender;
 import ru.hse.bot.service.interfaces.WalletUpdater;
 import ru.hse.bot.utility.TimeConverter;
-import ru.hse.bot.web.dto.SolanaDataResponse;
+import ru.hse.bot.web.dto.accounts.SolanaAccountDataResponse;
+import ru.hse.bot.web.dto.tokens.SolanaTokenResponse;
+import ru.hse.bot.web.dto.transfers.SolanaTransactionDataResponse;
 import ru.hse.bot.web.interfaces.WebClientSolana;
 
 import java.time.OffsetDateTime;
@@ -34,16 +36,62 @@ public class MainWalletUpdater implements WalletUpdater {
         for (Wallet wallet : walletsToUpdate) {
             log.info("Founded wallet to update: {}", wallet.getNumber());
             wallet.setCheckedAt(OffsetDateTime.now());
-            SolanaDataResponse response = solanaClient.fetchWalletsTransactions(wallet.getNumber());
-            if (wallet.getLastActivity().isBefore(convertTime(response.blockTime()))) {
-                wallet.setLastActivity(convertTime(response.blockTime()));
-                log.info("Wallet update successful, sending changes to bot...");
-                sender.send(new WalletUpdateResponse(
-                        wallet.getId(),
-                        wallet.getNumber(),
-                        response.signature(),
-                        getUsers(wallet)
-                ));
+            List<SolanaAccountDataResponse> response = solanaClient.fetchWalletsTransactions(
+                    wallet.getNumber(),
+                    wallet.getLastActivity().toEpochSecond()
+            );
+
+            for (SolanaAccountDataResponse data : response) {
+                if (wallet.getLastActivity().isBefore(convertTimeFromUtc(data.blockTime()))) {
+                    wallet.setLastActivity(convertTimeFromUtc(data.blockTime()));
+                }
+                List<SolanaTransactionDataResponse> transferList = solanaClient.fetchTransactionInfo(data.signature());
+                String sourceTokenKey = "";
+                String destinationTokenKey = "";
+                long sourceTokenAmount = 0;
+                long destinationTokenAmount = 0;
+
+                for (SolanaTransactionDataResponse transfer : transferList) {
+                    if (transfer.action().equals("transfer") &&
+                            !transfer.token().isEmpty() &&
+                            transfer.status().equals("Successful") &&
+                            transfer.destination() != null
+                    ) {
+                        if (transfer.source().equals(wallet.getNumber()) && sourceTokenKey.isEmpty()) {
+                            sourceTokenKey = transfer.token();
+                            sourceTokenAmount = transfer.amount();
+                            log.info("Source Token is {}, {}", sourceTokenKey, sourceTokenAmount);
+                        }
+                        if (transfer.destination().equals(wallet.getNumber())) {
+                            destinationTokenKey = transfer.token();
+                            destinationTokenAmount = transfer.amount();
+                            log.info("Destination Token is {}, {}", destinationTokenKey, destinationTokenAmount);
+                        }
+                    }
+                }
+
+                if (!sourceTokenKey.isEmpty() && !destinationTokenKey.isEmpty()) {
+                    try {
+                        SolanaTokenResponse sourceTokenResponse = solanaClient.fetchTokenInfo(sourceTokenKey);
+                        sourceTokenKey = sourceTokenResponse.tokenList().symbol();
+
+                        SolanaTokenResponse destinationTokenResponse = solanaClient.fetchTokenInfo(destinationTokenKey);
+                        destinationTokenKey = destinationTokenResponse.tokenList().symbol();
+                    } catch (RuntimeException e) {
+                        log.info("No token info for token {} or {}", sourceTokenKey, destinationTokenKey);
+                    }
+                    log.info("Wallet update successful, sending changes to bot...");
+                    sender.send(new WalletUpdateResponse(
+                            wallet.getId(),
+                            wallet.getNumber(),
+                            data.signature(),
+                            sourceTokenKey,
+                            sourceTokenAmount,
+                            destinationTokenKey,
+                            destinationTokenAmount,
+                            getUsers(wallet)
+                    ));
+                }
             }
             walletRepository.update(wallet);
         }
@@ -58,7 +106,7 @@ public class MainWalletUpdater implements WalletUpdater {
         return users;
     }
 
-    private OffsetDateTime convertTime(Long utc) {
+    private OffsetDateTime convertTimeFromUtc(Long utc) {
         return TimeConverter.convertFromUtcToOffsetDateTime(utc);
     }
 }

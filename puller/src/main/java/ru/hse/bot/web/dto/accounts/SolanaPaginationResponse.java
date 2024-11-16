@@ -1,4 +1,4 @@
-package ru.hse.bot.web.dto;
+package ru.hse.bot.web.dto.accounts;
 
 import jakarta.validation.constraints.NotNull;
 

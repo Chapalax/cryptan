@@ -45,33 +45,6 @@ services:
     networks:
       - backend
 
-  telegram:
-    container_name: telegram
-    image: cryptan_bot:latest
-    ports:
-      - "8090:8090"
-    depends_on:
-      - puller
-      - rabbitmq
-    environment:
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - BASEURL_PULLER=http://puller
-    networks:
-      - backend
-
-  puller:
-    container_name: puller
-    image: puller:latest
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres/puller
-    networks:
-      - backend
-
-
 volumes:
   postgres-data:
   rabbitmq-data:

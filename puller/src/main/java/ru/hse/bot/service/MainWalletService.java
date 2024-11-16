@@ -13,9 +13,6 @@ import ru.hse.bot.exceptions.AddedWalletExistsException;
 import ru.hse.bot.exceptions.ChatNotFoundException;
 import ru.hse.bot.exceptions.WalletNotFoundException;
 import ru.hse.bot.service.interfaces.WalletService;
-import ru.hse.bot.utility.TimeConverter;
-import ru.hse.bot.web.dto.SolanaDataResponse;
-import ru.hse.bot.web.interfaces.WebClientSolana;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +23,6 @@ public class MainWalletService implements WalletService {
     private final DaoWalletRepository walletRepository;
     private final DaoTgChatRepository tgChatRepository;
     private final DaoTrackRepository trackRepository;
-    private final WebClientSolana solanaClient;
 
     @Override
     public Wallet add(long tgChatId, @NotNull String number) {
@@ -46,8 +42,6 @@ public class MainWalletService implements WalletService {
                 throw new AddedWalletExistsException("Wallet already added.");
             }
         } else {
-            SolanaDataResponse response = solanaClient.fetchWalletsTransactions(wallet.getNumber());
-            wallet.setLastActivity(TimeConverter.convertFromUtcToOffsetDateTime(response.blockTime()));
             wallet = walletRepository.add(wallet);
         }
 
