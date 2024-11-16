@@ -60,12 +60,10 @@ public class MainWalletUpdater implements WalletUpdater {
                         if (transfer.source().equals(wallet.getNumber()) && sourceTokenKey.isEmpty()) {
                             sourceTokenKey = transfer.token();
                             sourceTokenAmount = transfer.amount();
-                            log.info("Source Token is {}, {}", sourceTokenKey, sourceTokenAmount);
                         }
                         if (transfer.destination().equals(wallet.getNumber())) {
                             destinationTokenKey = transfer.token();
                             destinationTokenAmount = transfer.amount();
-                            log.info("Destination Token is {}, {}", destinationTokenKey, destinationTokenAmount);
                         }
                     }
                 }
