@@ -18,10 +18,11 @@ import java.util.List;
 @Slf4j
 public class UserMessageHandler implements UserMessageProcessor {
     private final String WARNING = "This command does not exist.\nList of available commands: /help";
+    private final String TRACK_ERROR = "You must enter the wallet number and then the name separated by a space!";
     private final String SUCCESSFUL_TRACK = "The wallet has been successfully added!";
     private final String SUCCESSFUL_UNTRACK = "The wallet has been successfully deleted!";
-    private final String REPLY_TRACK = "In response to this message, enter the wallet number you are interested in:";
-    private final String REPLY_UNTRACK = "In response to this message, enter the number of the wallet whose transactions you want to unsubscribe from:";
+    private final String REPLY_TRACK = "In response to this message, enter the number of the wallet you are interested in and the name you want to give it";
+    private final String REPLY_UNTRACK = "In response to this message, enter the number of the wallet whose transactions you want to unsubscribe from";
 
     private final PullerWebClient pullerClient;
 
@@ -46,8 +47,11 @@ public class UserMessageHandler implements UserMessageProcessor {
         }
         if (isReplyTrack(update)) {
             try {
-                pullerClient.addWallet(update.message().chat().id(), new AddWalletRequest(update.message().text()));
+                String[] message = update.message().text().trim().split(" ", 2);
+                pullerClient.addWallet(update.message().chat().id(), new AddWalletRequest(message[0], message[1]));
                 return createSendMessage(update, SUCCESSFUL_TRACK);
+            } catch (IndexOutOfBoundsException error) {
+                return createSendMessage(update, TRACK_ERROR);
             } catch (ApiErrorResponse errorResponse) {
                 return createSendMessage(update, errorResponse.getDescription());
             }

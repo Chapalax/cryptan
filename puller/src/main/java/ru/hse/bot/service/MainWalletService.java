@@ -1,5 +1,6 @@
 package ru.hse.bot.service;
 
+import io.prometheus.client.Gauge;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,17 @@ public class MainWalletService implements WalletService {
     private final DaoWalletRepository walletRepository;
     private final DaoTgChatRepository tgChatRepository;
     private final DaoTrackRepository trackRepository;
+    private final Gauge activeUsersGauge = Gauge.build()
+            .name("bot_users_active")
+            .help("Total users with minimum 1 tracked wallet")
+            .register();
+    private final Gauge walletsGauge = Gauge.build()
+            .name("puller_wallets")
+            .help("Total tracked wallets by system")
+            .register();
 
     @Override
-    public Wallet add(long tgChatId, @NotNull String number) {
+    public Wallet add(long tgChatId, @NotNull String number, @NotNull String name) {
         TgChat chat = new TgChat();
         chat.setId(tgChatId);
 
@@ -43,11 +52,16 @@ public class MainWalletService implements WalletService {
             }
         } else {
             wallet = walletRepository.add(wallet);
+            walletsGauge.inc();
         }
 
+        if (trackRepository.findAllTracksByUser(chat).isEmpty()) {
+            activeUsersGauge.inc();
+        }
         Track track = new Track();
         track.setChatId(tgChatId);
         track.setWalletId(wallet.getId());
+        track.setWalletName(name);
         trackRepository.add(track);
         return wallet;
     }
@@ -74,6 +88,10 @@ public class MainWalletService implements WalletService {
         }
         if (!trackRepository.isTrackedByAnyone(wallet)) {
             walletRepository.remove(wallet);
+            walletsGauge.dec();
+        }
+        if (trackRepository.findAllTracksByUser(chat).isEmpty()) {
+            activeUsersGauge.dec();
         }
         return wallet;
     }

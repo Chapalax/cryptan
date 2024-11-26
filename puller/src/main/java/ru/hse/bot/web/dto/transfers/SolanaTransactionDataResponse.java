@@ -11,6 +11,6 @@ public record SolanaTransactionDataResponse(
         @NotNull String source,
         @Nullable String destination,
         @NotNull String token,
-        @NotNull Long amount,
+        @NotNull Double amount,
         @NotNull Long timestamp
 ) { }

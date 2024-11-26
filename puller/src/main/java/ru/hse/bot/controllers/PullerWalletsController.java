@@ -37,7 +37,7 @@ public class PullerWalletsController {
             @RequestHeader("Tg-Chat-Id") long tgChatId,
             @RequestBody @Valid @NotNull AddWalletRequest addWalletRequest
     ) {
-        Wallet addedWallet = walletService.add(tgChatId, addWalletRequest.wallet());
+        Wallet addedWallet = walletService.add(tgChatId, addWalletRequest.wallet(), addWalletRequest.name());
         return new ResponseEntity<>(new WalletResponse(addedWallet.getId(), addedWallet.getNumber()), HttpStatus.OK);
     }
 

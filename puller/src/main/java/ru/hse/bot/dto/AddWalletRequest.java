@@ -1,4 +1,4 @@
 package ru.hse.bot.dto;
 
-public record AddWalletRequest(String wallet) {
+public record AddWalletRequest(String wallet, String name) {
 }

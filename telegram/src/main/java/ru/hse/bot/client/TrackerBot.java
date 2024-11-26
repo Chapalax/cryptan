@@ -7,6 +7,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
+import io.prometheus.client.Counter;
 import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +19,17 @@ import ru.hse.bot.client.interfaces.UserMessageProcessor;
 import ru.hse.bot.dto.WalletUpdateRequest;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class TrackerBot implements Bot {
     private static TelegramBot bot;
     private final UserMessageProcessor userMessageProcessor;
+    private static final Counter messagesCounter = Counter.build()
+            .name("bot_messages")
+            .help("Total messages received/sent")
+            .labelNames("thread")
+            .register();
 
     @Autowired
     public TrackerBot(@NotNull UserMessageProcessor messageProcessor, @Value("${app.token}") String token) {
@@ -53,17 +60,18 @@ public class TrackerBot implements Bot {
                 userMessageProcessor.deleteChat(update);
             } else {
                 bot.execute(userMessageProcessor.process(update));
+                messagesCounter.labels("income").inc();
             }
         }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
     public static void sendUpdates(@NotNull WalletUpdateRequest updates) {
-        for (Long tgChatId : updates.tgChatIds()) {
+        for (Map.Entry<Long, String> tgChatInfo : updates.tgChatInfo().entrySet()) {
             bot.execute(new SendMessage(
-                    tgChatId,
+                    tgChatInfo.getKey(),
                     "*New transactions!*\n" +
-                            "\n*Wallet:*\n" + updates.wallet() +
+                            "\n*Wallet:*\n" + tgChatInfo.getValue() +
                             "\n\n*Transaction:*\n" + updates.transaction() +
                             "\n\n*Swapped* " + updates.sourceTokenAmount() +
                             " " + updates.sourceTokenKey() + " on " +
@@ -71,6 +79,7 @@ public class TrackerBot implements Bot {
                             updates.destinationTokenKey()
                     ).parseMode(ParseMode.Markdown)
             );
+            messagesCounter.labels("outcome").inc();
         }
     }
 }

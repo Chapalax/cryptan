@@ -1,14 +1,14 @@
 package ru.hse.bot.dto;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public record WalletUpdateRequest(
         long id,
         String wallet,
         String transaction,
         String sourceTokenKey,
-        long sourceTokenAmount,
+        double sourceTokenAmount,
         String destinationTokenKey,
-        long destinationTokenAmount,
-        ArrayList<Long> tgChatIds
+        double destinationTokenAmount,
+        HashMap<Long, String> tgChatInfo
 ) { }

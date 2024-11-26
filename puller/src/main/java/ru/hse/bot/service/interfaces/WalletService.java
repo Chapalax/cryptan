@@ -6,7 +6,7 @@ import ru.hse.bot.domain.models.Wallet;
 import java.util.List;
 
 public interface WalletService {
-    Wallet add(long tgChatId, @NotNull String number);
+    Wallet add(long tgChatId, @NotNull String number, @NotNull String name);
 
     Wallet remove(long tgChatId, @NotNull String number);
 

@@ -1,5 +1,6 @@
 package ru.hse.bot.service;
 
+import io.prometheus.client.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ import ru.hse.bot.web.dto.transfers.SolanaTransactionDataResponse;
 import ru.hse.bot.web.interfaces.WebClientSolana;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -29,6 +30,11 @@ public class MainWalletUpdater implements WalletUpdater {
     private final WebClientSolana solanaClient;
     private final DaoWalletRepository walletRepository;
     private final DaoTrackRepository trackRepository;
+    private final Counter transactionsCounter = Counter.build()
+            .name("puller_transactions")
+            .help("Total transactions by wallet")
+            .labelNames("wallet")
+            .register();
 
     @Override
     public void update() {
@@ -48,8 +54,8 @@ public class MainWalletUpdater implements WalletUpdater {
                 List<SolanaTransactionDataResponse> transferList = solanaClient.fetchTransactionInfo(data.signature());
                 String sourceTokenKey = "";
                 String destinationTokenKey = "";
-                long sourceTokenAmount = 0;
-                long destinationTokenAmount = 0;
+                double sourceTokenAmount = 0;
+                double destinationTokenAmount = 0;
 
                 for (SolanaTransactionDataResponse transfer : transferList) {
                     if (transfer.action().equals("transfer") &&
@@ -84,24 +90,25 @@ public class MainWalletUpdater implements WalletUpdater {
                             wallet.getNumber(),
                             data.signature(),
                             sourceTokenKey,
-                            sourceTokenAmount,
+                            sourceTokenAmount / 1000000000,
                             destinationTokenKey,
-                            destinationTokenAmount,
+                            destinationTokenAmount / 1000000000,
                             getUsers(wallet)
                     ));
+                    transactionsCounter.labels(wallet.getNumber()).inc();
                 }
             }
             walletRepository.update(wallet);
         }
     }
 
-    private @NotNull ArrayList<Long> getUsers(Wallet wallet) {
+    private @NotNull HashMap<Long, String> getUsers(Wallet wallet) {
         List<Track> allTracks = trackRepository.findAllTracksWithWallet(wallet);
-        ArrayList<Long> users = new ArrayList<>();
+        HashMap<Long, String> usersWithWalletNames = new HashMap<>();
         for (Track track : allTracks) {
-            users.add(track.getChatId());
+            usersWithWalletNames.put(track.getChatId(), track.getWalletName());
         }
-        return users;
+        return usersWithWalletNames;
     }
 
     private OffsetDateTime convertTimeFromUtc(Long utc) {

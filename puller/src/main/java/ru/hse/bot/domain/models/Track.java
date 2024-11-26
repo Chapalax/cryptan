@@ -17,4 +17,7 @@ public class Track {
     @Id
     @Column(name = "wallet_id")
     private Long walletId;
+
+    @Column(name = "wallet_name", nullable = false)
+    private String walletName;
 }
