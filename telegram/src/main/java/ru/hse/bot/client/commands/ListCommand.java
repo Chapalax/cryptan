@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 import ru.hse.bot.client.interfaces.Command;
 import ru.hse.bot.web.PullerWebClient;
 import ru.hse.bot.web.dto.ApiErrorResponse;
+import ru.hse.bot.web.dto.ListWalletsResponse;
+
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -33,14 +36,17 @@ public class ListCommand implements Command {
     @Override
     public SendMessage handle(@NotNull Update update) {
         try {
-            var listWalletsResponse = pullerWebClient.getAllWallets(update.message().chat().id());
+            ListWalletsResponse listWalletsResponse = pullerWebClient.getAllWallets(update.message().chat().id());
             if (listWalletsResponse.size() == 0) {
                 return new SendMessage(update.message().chat().id(), WARNING);
             }
-            var message = new StringBuilder();
+            StringBuilder message = new StringBuilder();
             message.append(ANSWER);
-            for (int i = 0; i < listWalletsResponse.size(); i++) {
-                message.append(listWalletsResponse.wallets().get(i).wallet()).append("\n");
+            for (Map.Entry<String, String> entry : listWalletsResponse.walletsWithNames().entrySet()) {
+                message.append(entry.getValue())
+                        .append("\n")
+                        .append(entry.getKey())
+                        .append("\n\n");
             }
             return new SendMessage(update.message().chat().id(), message.toString());
         } catch (ApiErrorResponse errorResponse) {

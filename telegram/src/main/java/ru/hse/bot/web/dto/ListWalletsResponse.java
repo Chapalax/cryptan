@@ -2,7 +2,7 @@ package ru.hse.bot.web.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
-public record ListWalletsResponse(@NotNull ArrayList<WalletResponse> wallets, int size) {
+public record ListWalletsResponse(@NotNull HashMap<String, String> walletsWithNames, int size) {
 }

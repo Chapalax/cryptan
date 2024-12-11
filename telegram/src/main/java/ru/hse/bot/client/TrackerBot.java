@@ -68,15 +68,24 @@ public class TrackerBot implements Bot {
 
     public static void sendUpdates(@NotNull WalletUpdateRequest updates) {
         for (Map.Entry<Long, String> tgChatInfo : updates.tgChatInfo().entrySet()) {
+            StringBuilder message = new StringBuilder();
             bot.execute(new SendMessage(
                     tgChatInfo.getKey(),
-                    "*New transactions!*\n" +
-                            "\n*Wallet:*\n" + tgChatInfo.getValue() +
-                            "\n\n*Transaction:*\n" + updates.transaction() +
-                            "\n\n*Swapped* " + updates.sourceTokenAmount() +
-                            " " + updates.sourceTokenKey() + " on " +
-                            updates.destinationTokenAmount() + " " +
-                            updates.destinationTokenKey()
+                    message.append("*New transactions!*\n")
+                            .append("\n*Wallet:*\n")
+                            .append(tgChatInfo.getValue())
+                            .append("\n\n*Transaction:*\n")
+                            .append(updates.transaction())
+                            .append("\n\n*Swapped* ")
+                            .append(updates.sourceTokenAmount())
+                            .append(" ")
+                            .append(updates.sourceTokenKey())
+                            .append(" on ")
+                            .append(updates.destinationTokenAmount())
+                            .append(" ")
+                            .append(updates.destinationTokenKey())
+                            .append("\nhttps://raydium.io/swap/")
+                            .toString()
                     ).parseMode(ParseMode.Markdown)
             );
             messagesCounter.labels("outcome").inc();

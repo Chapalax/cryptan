@@ -13,8 +13,7 @@ import ru.hse.bot.dto.RemoveWalletRequest;
 import ru.hse.bot.dto.WalletResponse;
 import ru.hse.bot.service.interfaces.WalletService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/wallets")
@@ -24,12 +23,8 @@ public class PullerWalletsController {
 
     @GetMapping
     public ResponseEntity<ListWalletsResponse> getAllLinks(@RequestHeader("Tg-Chat-Id") long tgChatId) {
-        List<Wallet> walletList = walletService.listAll(tgChatId);
-        ArrayList<WalletResponse> responseList = new ArrayList<>();
-        for (Wallet wallet : walletList) {
-            responseList.add(new WalletResponse(wallet.getId(), wallet.getNumber()));
-        }
-        return new ResponseEntity<>(new ListWalletsResponse(responseList, responseList.size()), HttpStatus.OK);
+        HashMap<String, String> walletList = walletService.listAll(tgChatId);
+        return new ResponseEntity<>(new ListWalletsResponse(walletList, walletList.size()), HttpStatus.OK);
     }
 
     @PostMapping

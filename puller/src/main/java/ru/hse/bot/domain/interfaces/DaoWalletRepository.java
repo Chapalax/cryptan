@@ -5,11 +5,11 @@ import ru.hse.bot.domain.models.Wallet;
 import java.util.List;
 
 public interface DaoWalletRepository extends Dao<Wallet> {
-    Boolean isExists(Wallet wallet);
+    Boolean isExists(String number);
 
-    Wallet findByNumber(Wallet wallet);
+    Wallet findByNumber(String number);
 
-    Wallet findById(Wallet wallet);
+    Wallet findById(Long id);
 
     List<Wallet> findAllToUpdate();
 

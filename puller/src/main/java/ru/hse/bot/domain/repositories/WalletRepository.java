@@ -20,20 +20,20 @@ public class WalletRepository implements DaoWalletRepository {
 
     @Override
     @Transactional
-    public Boolean isExists(Wallet wallet) {
-        return walletRepository.existsByNumber(wallet.getNumber());
+    public Boolean isExists(String number) {
+        return walletRepository.existsByNumber(number);
     }
 
     @Override
     @Transactional
-    public Wallet findByNumber(Wallet wallet) {
-        return walletRepository.findWalletByNumber(wallet.getNumber());
+    public Wallet findByNumber(String number) {
+        return walletRepository.findWalletByNumber(number);
     }
 
     @Override
     @Transactional
-    public Wallet findById(Wallet wallet) {
-        return walletRepository.findById(wallet.getId())
+    public Wallet findById(Long id) {
+        return walletRepository.findById(id)
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found."));
     }
 

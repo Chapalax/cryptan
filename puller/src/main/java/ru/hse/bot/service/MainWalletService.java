@@ -15,7 +15,7 @@ import ru.hse.bot.exceptions.ChatNotFoundException;
 import ru.hse.bot.exceptions.WalletNotFoundException;
 import ru.hse.bot.service.interfaces.WalletService;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -37,16 +37,14 @@ public class MainWalletService implements WalletService {
     public Wallet add(long tgChatId, @NotNull String number, @NotNull String name) {
         TgChat chat = new TgChat();
         chat.setId(tgChatId);
+        Wallet wallet = new Wallet();
 
         if (!tgChatRepository.isExists(chat)) {
             throw new ChatNotFoundException("Chat not found.");
         }
 
-        Wallet wallet = new Wallet();
-        wallet.setNumber(number);
-
-        if (walletRepository.isExists(wallet)) {
-            wallet = walletRepository.findByNumber(wallet);
+        if (walletRepository.isExists(number)) {
+            wallet = walletRepository.findByNumber(number);
             if (trackRepository.isTracked(chat, wallet)) {
                 throw new AddedWalletExistsException("Wallet already added.");
             }
@@ -73,13 +71,11 @@ public class MainWalletService implements WalletService {
         if (!tgChatRepository.isExists(chat)) {
             throw new ChatNotFoundException("Chat not found.");
         }
-        Wallet wallet = new Wallet();
-        wallet.setNumber(number);
 
-        if (!walletRepository.isExists(wallet)) {
+        if (!walletRepository.isExists(number)) {
             throw new WalletNotFoundException("Link not found.");
         }
-        wallet = walletRepository.findByNumber(wallet);
+        Wallet wallet = walletRepository.findByNumber(number);
         Track track = new Track();
         track.setChatId(tgChatId);
         track.setWalletId(wallet.getId());
@@ -97,20 +93,19 @@ public class MainWalletService implements WalletService {
     }
 
     @Override
-    public List<Wallet> listAll(long tgChatId) {
+    public HashMap<String, String> listAll(long tgChatId) {
         TgChat chat = new TgChat();
         chat.setId(tgChatId);
-        List<Wallet> wallets = new ArrayList<>();
+        HashMap<String, String> walletsToNicknames = new HashMap<>();
 
         if (!tgChatRepository.isExists(chat)) {
             throw new ChatNotFoundException("Chat not found.");
         }
         List<Track> allTracks = trackRepository.findAllTracksByUser(chat);
         for (Track current : allTracks) {
-            Wallet temp = new Wallet();
-            temp.setId(current.getWalletId());
-            wallets.add(walletRepository.findById(temp));
+            Wallet trackedWallet = walletRepository.findById(current.getWalletId());
+            walletsToNicknames.put(trackedWallet.getNumber(), current.getWalletName());
         }
-        return wallets;
+        return walletsToNicknames;
     }
 }
